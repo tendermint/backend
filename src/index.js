@@ -1,9 +1,10 @@
-const express = require('express');
-const axios = require('axios');
-const convert = require('xml-js');
-const bodyParser = require('body-parser')
-
-const app = express();
+const
+  express = require('express'),
+  bodyParser = require('body-parser'),
+  convert = require('xml-js'),
+  axios = require('axios'),
+  cache = require("./cache"),
+  app = express()
 
 app.use(bodyParser.json());
 
@@ -13,9 +14,13 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get('/medium', function (request, response) {
+app.get('/medium/:source', cache.serve(30), function (request, response) {
+  const urls = {
+    tendermint: "https://medium.com/feed/tendermint?latest",
+    cosmos: "https://blog.cosmos.network/feed"
+  }
   response.setHeader('Content-Type', 'application/json');
-  axios.get('https://medium.com/feed/tendermint?latest')
+  axios.get(urls[request.params.source])
     .then(({ data }) => {
       response.status(200).send(convert.xml2json(data, { compact: true }))
     })
