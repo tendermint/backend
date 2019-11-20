@@ -4,6 +4,8 @@ const
   convert = require('xml-js'),
   axios = require('axios'),
   cache = require("./cache"),
+  HTMLParser = require('node-html-parser'),
+  _ = require("lodash"),
   app = express()
 
 app.use(bodyParser.json());
@@ -14,17 +16,26 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get('/medium/:source', cache.serve(30), function (request, response) {
-  const urls = {
-    tendermint: "https://medium.com/feed/tendermint?latest",
-    cosmos: "https://blog.cosmos.network/feed"
-  }
-  response.setHeader('Content-Type', 'application/json');
-  axios.get(urls[request.params.source])
-    .then(({ data }) => {
-      response.status(200).send(convert.xml2json(data, { compact: true }))
-    })
-    .catch(err => response.send(err));
+app.get('/medium/?', cache.serve(30), function (req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  axios.all([
+    axios.get("https://medium.com/feed/tendermint?latest"),
+    axios.get("https://blog.cosmos.network/feed")
+  ]).then(responses => {
+    const all = responses.map(e => {
+      return JSON.parse(convert.xml2json(e.data, { compact: true })).rss.channel.item.map(item => {
+        return {
+          title: item.title._cdata,
+          link: item.link._text,
+          date: item.pubDate._text,
+          image: HTMLParser.parse(item["content:encoded"]._cdata).querySelector("img").attributes['src'].toString(),
+          timestamp: new Date(item.pubDate._text).getTime()
+        }
+      })
+    }).flat(1)
+    const sorted = _.orderBy(all, ["timestamp"], ["desc"])
+    res.status(200).send(sorted)
+  })
 });
 
 const listener = app.listen(process.env.PORT, function () {
