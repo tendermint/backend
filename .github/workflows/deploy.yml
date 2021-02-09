@@ -1,0 +1,44 @@
+name: build and deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Setup gcloud cli
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_B64 }}
+          project_id: tendermint
+          export_default_credentials: true
+
+      - name: Configure docker and install gcloud components
+        run: |
+          gcloud auth configure-docker --quiet
+          gcloud components install beta --quiet
+      - name: Build and Push
+        run: |
+          docker build -t gcr.io/tendermint/tendermint-blog-feed:${GITHUB_SHA::8} .
+          docker tag gcr.io/tendermint/tendermint-blog-feed:${GITHUB_SHA::8} gcr.io/tendermint/tendermint-blog-feed:latest
+          docker push gcr.io/tendermint/tendermint-blog-feed:${GITHUB_SHA::8}
+          docker push gcr.io/tendermint/tendermint-blog-feed:latest
+      - name: Deploy to cloud run
+        run: gcloud beta run deploy tendermint-blog-feed --quiet
+          --region us-east1
+          --platform managed
+          --allow-unauthenticated
+          --image gcr.io/tendermint/tendermint-blog-feed:latest
+          --concurrency 80
+          --memory 128Mi
+          --cpu 1000m
+          --max-instances 3
+          --port 8080
+          --timeout 300s
