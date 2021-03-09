@@ -45,16 +45,18 @@ app.get('/cosmos/tag/tutorial', cache.serve(30), function (req, res) {
     axios.get("https://blog.cosmos.network/feed")
   ]).then(responses => {
     const all = responses.map(e => {
-      return JSON.parse(convert.xml2json(e.data, { compact: true })).rss.channel.item.map(item => {
+      return JSON.parse(convert.xml2json(e.data, { compact: true })).rss.channel.item
+      .map(item => {
         return {
           title: item.title._cdata,
           link: item.link._text,
           date: item.pubDate._text,
           image: HTMLParser.parse(item["content:encoded"]._cdata).querySelector("img").attributes['src'].toString(),
           timestamp: new Date(item.pubDate._text).getTime(),
-          category: item.category._cdata || item.category.map(i => i._cdata)
+          category: item.category._cdata || item.category.map(i => i._cdata),
         }
       })
+      .filter(item => item.category.indexOf("tutorial") !== -1)
     }).flat(1)
     res.status(200).send(all)
   })
