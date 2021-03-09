@@ -37,7 +37,7 @@ npm run start
 
 ### GET `/cosmos/tag/tutorial`
 
-**200**: Returns a list of medium feed from `https://blog.cosmos.network/feed` filtered with `tutorial` category.
+**200**: Returns a list of medium feed from `https://blog.cosmos.network/feed` with category.
 ```
 [
   {
