@@ -3,11 +3,19 @@ const
   bodyParser = require('body-parser'),
   convert = require('xml-js'),
   axios = require('axios'),
+  fetch = require('node-fetch'),
   cache = require("./cache"),
   HTMLParser = require('node-html-parser'),
   _ = require("lodash"),
   app = express(),
   port = process.env.PORT || 8888;
+
+require('dotenv').config()
+
+// Mirror json file of https://api.messari.io/api/screener/FCB5C9E8
+const assets = require("../assets.json");
+
+const MESSARI_API_KEY = process.env.MESSARI_API_KEY
 
 app.use(bodyParser.json());
 
@@ -15,6 +23,10 @@ app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
+});
+
+app.get("/", async (req, res) => {
+  res.json({ api: "ok" });
 });
 
 app.get('/medium/?', cache.serve(30), function (req, res) {
@@ -61,6 +73,56 @@ app.get('/cosmos/tag/tutorial', cache.serve(30), function (req, res) {
     res.status(200).send(all)
   })
   .catch(error => console.log(error))
+});
+
+app.get("/marketcap", cache.serve(30), async (req, res) => {
+  // Uncomment to use realtime messari screener api filters watchedAssets
+  // const data = (await axios.get(`https://api.messari.io/api/screener/FCB5C9E8`)).data;
+  // const watchedAssetsList = data.filters.watch.watchedAssets
+  // res.json(assets)
+
+  let list = []
+
+  await Promise.all(
+    assets.watchedAssets.map(id => {
+      return new Promise((resolve) => {
+        fetch(`https://data.messari.io/api/v1/assets/${id}/metrics`, {
+          headers: {
+            'x-messari-api-key': MESSARI_API_KEY
+          }
+        })
+        .then(response => {
+          return new Promise(() => {
+            response.json().then(item => {
+              // handle current_marketcap_usd: null
+              // e.g. https://data.messari.io/api/v1/assets/starname/metrics
+              const currentMarketcap = item.data.marketcap.current_marketcap_usd || 0
+              list.push(currentMarketcap)
+              resolve()
+            })
+          })
+        })
+      })
+    })
+  )
+  .then(() => {
+    const billion = 1000000000
+
+    // filter false value in array
+    const checkNullList = list.filter(Boolean)
+    const sum = checkNullList.reduce((a, b) => a + b, 0)
+    const totalMarketcap = Number((Math.round(sum) / billion).toFixed(2))
+
+    res.setHeader(
+      'Cache-Control',
+      'public, s-maxage=1200, stale-while-revalidate=600'
+    );
+
+    res.send(JSON.stringify(totalMarketcap));
+  })
+  .catch((err) => {
+    console.log(err)
+  })
 });
 
 const listener = app.listen(port, function () {

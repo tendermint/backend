@@ -56,3 +56,7 @@ npm run start
   }
 ]
 ```
+
+### GET `/marketcap`
+
+**200**: Returns the value of total current market cap of Cosmos Ecosystem apps in billion (_Messari API_)
