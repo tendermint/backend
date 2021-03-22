@@ -26,16 +26,16 @@ jobs:
           gcloud components install beta --quiet
       - name: Build and Push
         run: |
-          docker build -t gcr.io/tendermint/tendermint-blog-feed:${GITHUB_SHA::8} .
-          docker tag gcr.io/tendermint/tendermint-blog-feed:${GITHUB_SHA::8} gcr.io/tendermint/tendermint-blog-feed:latest
-          docker push gcr.io/tendermint/tendermint-blog-feed:${GITHUB_SHA::8}
-          docker push gcr.io/tendermint/tendermint-blog-feed:latest
+          docker build -t gcr.io/tendermint/tendermint-backend:${GITHUB_SHA::8} .
+          docker tag gcr.io/tendermint/tendermint-backend:${GITHUB_SHA::8} gcr.io/tendermint/tendermint-backend:latest
+          docker push gcr.io/tendermint/tendermint-backend:${GITHUB_SHA::8}
+          docker push gcr.io/tendermint/tendermint-backend:latest
       - name: Deploy to cloud run
-        run: gcloud beta run deploy tendermint-blog-feed --quiet
+        run: gcloud beta run deploy tendermint-backend --quiet
           --region us-east1
           --platform managed
           --allow-unauthenticated
-          --image gcr.io/tendermint/tendermint-blog-feed:latest
+          --image gcr.io/tendermint/tendermint-backend:latest
           --concurrency 80
           --memory 128Mi
           --cpu 1000m
