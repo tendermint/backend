@@ -4,9 +4,10 @@ const
   convert = require('xml-js'),
   axios = require('axios'),
   fetch = require('node-fetch'),
-  cache = require("./cache"),
+  Airtable = require('airtable-node'),
   HTMLParser = require('node-html-parser'),
   _ = require("lodash"),
+  cache = require("./cache"),
   app = express(),
   port = process.env.PORT || 8888;
 
@@ -15,6 +16,7 @@ require('dotenv').config()
 // Mirror json file of https://api.messari.io/api/screener/FCB5C9E8
 const assets = require("../assets.json");
 
+const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY
 const MESSARI_API_KEY = process.env.MESSARI_API_KEY
 
 app.use(bodyParser.json());
@@ -122,6 +124,31 @@ app.get("/marketcap", cache.serve(30), async (req, res) => {
   })
   .catch((err) => {
     console.log(err)
+  })
+});
+
+app.get("/apps", async (req, res) => {
+  const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
+    .base('app257DDgKV2KGpWA')
+    .table('apps')
+
+  airtable.list({
+    view: 'All apps',
+    maxRecords: 1000
+  }).then(response => {
+    res.send(response)    
+  })
+});
+
+app.get("/wallets", async (req, res) => {
+  const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
+    .base('app257DDgKV2KGpWA')
+    .table('wallets')
+
+  airtable.list({
+    maxRecords: 1000
+  }).then(response => {
+    res.send(response)
   })
 });
 

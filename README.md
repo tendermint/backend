@@ -2,6 +2,8 @@
 
 This is a server to fetch data from third-party sources, serve content and do everything a front-end can't.
 
+⚡️ https://backend.tendermint.com
+
 # Install
 
 The server needs a reasonably recent version of Node.js installed.
@@ -60,3 +62,11 @@ npm run start
 ### GET `/marketcap`
 
 **200**: Returns the value of total current market cap of Cosmos Ecosystem apps in billion (_Messari API_)
+
+### GET `/apps`
+
+**200**: Returns a list of Ecosystem apps & projects
+
+### GET `/wallets`
+
+**200**: Returns a list of Ecosystem wallets
