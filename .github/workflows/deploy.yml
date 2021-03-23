@@ -42,3 +42,4 @@ jobs:
           --max-instances 3
           --port 8080
           --timeout 300s
+          --update-env-vars MESSARI_API_KEY=${{ secrets.MESSARI_API_KEY }} AIRTABLE_API_KEY=${{ secrets.AIRTABLE_API_KEY }}
