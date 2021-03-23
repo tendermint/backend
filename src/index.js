@@ -3,11 +3,21 @@ const
   bodyParser = require('body-parser'),
   convert = require('xml-js'),
   axios = require('axios'),
-  cache = require("./cache"),
+  fetch = require('node-fetch'),
+  Airtable = require('airtable-node'),
   HTMLParser = require('node-html-parser'),
   _ = require("lodash"),
+  cache = require("./cache"),
   app = express(),
   port = process.env.PORT || 8888;
+
+require('dotenv').config()
+
+// Mirror json file of https://api.messari.io/api/screener/FCB5C9E8
+const assets = require("../assets.json");
+
+const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY
+const MESSARI_API_KEY = process.env.MESSARI_API_KEY
 
 app.use(bodyParser.json());
 
@@ -15,6 +25,10 @@ app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
+});
+
+app.get("/", async (req, res) => {
+  res.json({ api: "ok" });
 });
 
 app.get('/medium/?', cache.serve(30), function (req, res) {
@@ -61,6 +75,81 @@ app.get('/cosmos/tag/tutorial', cache.serve(30), function (req, res) {
     res.status(200).send(all)
   })
   .catch(error => console.log(error))
+});
+
+app.get("/marketcap", cache.serve(30), async (req, res) => {
+  // Uncomment to use realtime messari screener api filters watchedAssets
+  // const data = (await axios.get(`https://api.messari.io/api/screener/FCB5C9E8`)).data;
+  // const watchedAssetsList = data.filters.watch.watchedAssets
+  // res.json(assets)
+
+  let list = []
+
+  await Promise.all(
+    assets.watchedAssets.map(id => {
+      return new Promise((resolve) => {
+        fetch(`https://data.messari.io/api/v1/assets/${id}/metrics`, {
+          headers: {
+            'x-messari-api-key': MESSARI_API_KEY
+          }
+        })
+        .then(response => {
+          return new Promise(() => {
+            response.json().then(item => {
+              // handle current_marketcap_usd: null
+              // e.g. https://data.messari.io/api/v1/assets/starname/metrics
+              const currentMarketcap = item.data.marketcap.current_marketcap_usd || 0
+              list.push(currentMarketcap)
+              resolve()
+            })
+          })
+        })
+      })
+    })
+  )
+  .then(() => {
+    const billion = 1000000000
+
+    // filter false value in array
+    const checkNullList = list.filter(Boolean)
+    const sum = checkNullList.reduce((a, b) => a + b, 0)
+    const totalMarketcap = Number((Math.round(sum) / billion).toFixed(2))
+
+    res.setHeader(
+      'Cache-Control',
+      'public, s-maxage=1200, stale-while-revalidate=600'
+    );
+
+    res.send(JSON.stringify(totalMarketcap));
+  })
+  .catch((err) => {
+    console.log(err)
+  })
+});
+
+app.get("/apps", async (req, res) => {
+  const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
+    .base('app257DDgKV2KGpWA')
+    .table('apps')
+
+  airtable.list({
+    view: 'All apps',
+    maxRecords: 1000
+  }).then(response => {
+    res.send(response)    
+  })
+});
+
+app.get("/wallets", async (req, res) => {
+  const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
+    .base('app257DDgKV2KGpWA')
+    .table('wallets')
+
+  airtable.list({
+    maxRecords: 1000
+  }).then(response => {
+    res.send(response)
+  })
 });
 
 const listener = app.listen(port, function () {
