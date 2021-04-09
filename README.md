@@ -70,3 +70,9 @@ npm run start
 ### GET `/wallets`
 
 **200**: Returns a list of Ecosystem wallets
+
+---
+
+### Algolia bump
+
+`node index.js` - update apps and wallets algolia index every hour.

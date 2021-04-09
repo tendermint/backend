@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "serve": "PORT=9090 nodemon src/index.js",
-    "start": "nodemon src/index.js"
+    "start": "nodemon src/index.js",
+    "bump": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   "homepage": "https://github.com/tendermint/backend#readme",
   "dependencies": {
     "airtable-node": "^0.1.20",
+    "algoliasearch": "^4.8.6",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
