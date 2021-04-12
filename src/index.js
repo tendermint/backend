@@ -56,21 +56,33 @@ app.get('/medium/?', cache.serve(30), function (req, res) {
 app.get('/cosmos/tag/tutorial', cache.serve(30), function (req, res) {
   res.setHeader('Content-Type', 'application/json');
   axios.all([
-    axios.get("https://blog.cosmos.network/feed")
+    axios.get("https://blog.cosmos.network/feed/tagged/tutorial")
   ]).then(responses => {
     const all = responses.map(e => {
-      return JSON.parse(convert.xml2json(e.data, { compact: true })).rss.channel.item
-      .map(item => {
+      const parsed = JSON.parse(convert.xml2json(e.data, { compact: true })).rss.channel.item
+      // handle tagged items that have only 1 item
+      if (parsed.length) {
+        const mapItems = parsed.map(item => {
+          return {
+            title: item.title._cdata,
+            link: item.link._text,
+            date: item.pubDate._text,
+            image: HTMLParser.parse(item["content:encoded"]._cdata).querySelector("img").attributes['src'].toString(),
+            timestamp: new Date(item.pubDate._text).getTime(),
+            category: item.category._cdata || item.category.map(i => i._cdata),
+          }
+        })
+        return mapItems
+      } else {
         return {
-          title: item.title._cdata,
-          link: item.link._text,
-          date: item.pubDate._text,
-          image: HTMLParser.parse(item["content:encoded"]._cdata).querySelector("img").attributes['src'].toString(),
-          timestamp: new Date(item.pubDate._text).getTime(),
-          category: item.category._cdata || item.category.map(i => i._cdata),
+          title: parsed.title._cdata,
+          link: parsed.link._text,
+          date: parsed.pubDate._text,
+          image: HTMLParser.parse(parsed["content:encoded"]._cdata).querySelector("img").attributes['src'].toString(),
+          timestamp: new Date(parsed.pubDate._text).getTime(),
+          category: parsed.category._cdata || parsed.category.map(i => i._cdata),
         }
-      })
-      .filter(item => item.category.indexOf("tutorial") !== -1)
+      }
     }).flat(1)
     res.status(200).send(all)
   })
