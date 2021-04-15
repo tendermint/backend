@@ -71,6 +71,10 @@ npm run start
 
 **200**: Returns a list of Ecosystem wallets
 
+### GET `/explorers`
+
+**200**: Returns a list of Explorers wallets
+
 ---
 
 ### Algolia bump
