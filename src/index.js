@@ -164,6 +164,18 @@ app.get("/wallets", async (req, res) => {
   })
 });
 
+app.get("/explorers", async (req, res) => {
+  const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
+    .base('app257DDgKV2KGpWA')
+    .table('explorers')
+
+  airtable.list({
+    maxRecords: 1000
+  }).then(response => {
+    res.send(response)
+  })
+});
+
 const listener = app.listen(port, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
