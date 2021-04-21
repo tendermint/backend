@@ -18,12 +18,12 @@ npm install
 npm run start
 ```
 
-
 ## API
 
 ### GET `/medium`
 
 **200**: Returns a list of medium feed from `https://medium.com/feed/tendermint?latest` and `https://blog.cosmos.network/feed`
+
 ```
 [
   {
@@ -40,6 +40,7 @@ npm run start
 ### GET `/cosmos/tag/tutorial`
 
 **200**: Returns a list of Cosmos medium feed filtered by `tutorial` category.
+
 ```
 [
   {
@@ -74,6 +75,10 @@ npm run start
 ### GET `/explorers`
 
 **200**: Returns a list of Explorers wallets
+
+### GET `/dex-registration`
+
+**200**: Returns the total registration count for the Gravity DEX website
 
 ---
 
