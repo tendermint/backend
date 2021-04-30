@@ -208,7 +208,7 @@ app.get("/dex-registration", async (req, res) => {
 
   airtable
     .list({
-      maxRecords: 20000,
+      maxRecords: 50000,
     })
     .then((response) => {
       res.json({ registration_count: response.records.length });
