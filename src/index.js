@@ -201,20 +201,6 @@ app.get("/explorers", async (req, res) => {
     });
 });
 
-app.get("/dex-registration", async (req, res) => {
-  const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
-    .base("appcWbcj9n9NKHQu4")
-    .table("registrants");
-
-  airtable
-    .list({
-      maxRecords: 50000,
-    })
-    .then((response) => {
-      res.json({ registration_count: response.records.length });
-    });
-});
-
 const listener = app.listen(port, function () {
   console.log("Your app is listening on port " + listener.address().port);
 });

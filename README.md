@@ -76,10 +76,6 @@ npm run start
 
 **200**: Returns a list of Explorers wallets
 
-### GET `/dex-registration`
-
-**200**: Returns the total registration count for the Gravity DEX website
-
 ---
 
 ### Algolia bump
