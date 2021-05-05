@@ -139,12 +139,12 @@ app.get("/marketcap", cache.serve(30), async (req, res) => {
     })
   )
     .then(() => {
-      const billion = 1000000000;
-
       // filter false value in array
       const checkNullList = list.filter(Boolean);
       const sum = checkNullList.reduce((a, b) => a + b, 0);
-      const totalMarketcap = Number((Math.round(sum) / billion).toFixed(2));
+      const totalMarketcap = Number(
+        (Math.round(sum) / 1000 / 1000 / 1000).toFixed(2)
+      );
 
       res.setHeader(
         "Cache-Control",
@@ -198,6 +198,62 @@ app.get("/explorers", async (req, res) => {
     })
     .then((response) => {
       res.send(response);
+    });
+});
+
+app.get("/coingecko-cosmos-marketcap", cache.serve(30), async (req, res) => {
+  const data = [
+    "cosmos",
+    "iris-network",
+    "terra-luna",
+    "terrausd",
+    "binancecoin",
+    "okb",
+    "crypto-com-chain",
+    "thorchain",
+    "fetch-ai",
+    "kucoin-shares",
+    "mirror-protocol",
+    "kava",
+    "band-protocol",
+    "oasis-network",
+    "akash-network",
+    "secret",
+    "anchor-protocol",
+    "injective-protocol",
+    "bluezelle",
+    "switcheo",
+    "certik",
+    "sentinel-group",
+    "hard-protocol",
+    "oraichain-token",
+    "foam-protocol",
+    "kira-network",
+    "e-money",
+    "likecoin",
+    "starname",
+    "sifchain",
+    "bitsong",
+  ];
+  const tokenIdStrings = data.toString();
+
+  await axios
+    .get(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${tokenIdStrings}&vs_currencies=usd&include_market_cap=true`
+    )
+    .then((response) => {
+      const marketcap = Object.values(response.data).map(
+        (i) => i.usd_market_cap || 0
+      );
+      const sum = marketcap.reduce((a, b) => a + b, 0);
+      const totalMarketcap = Number(
+        (Math.round(sum) / 1000 / 1000 / 1000).toFixed(2)
+      );
+
+      res.send(JSON.stringify(totalMarketcap));
+    })
+    .catch((err) => {
+      console.log(err);
     });
 });
 
