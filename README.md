@@ -76,6 +76,10 @@ npm run start
 
 **200**: Returns a list of Explorers wallets
 
+### GET `/coingecko-cosmos-marketcap`
+
+**200**: Returns the value of total market cap of Cosmos projects using Coingecko API
+
 ---
 
 ### Algolia bump
