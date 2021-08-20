@@ -203,7 +203,7 @@ app.get("/explorers", async (req, res) => {
 
 app.get("/events", async (req, res) => {
   const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
-    .base("app257DDgKV2KGpWA")
+    .base("app6cmf6dU89OHtUP")
     .table("events");
 
   airtable
