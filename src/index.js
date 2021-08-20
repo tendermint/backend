@@ -201,6 +201,20 @@ app.get("/explorers", async (req, res) => {
     });
 });
 
+app.get("/events", async (req, res) => {
+  const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
+    .base("app257DDgKV2KGpWA")
+    .table("events");
+
+  airtable
+    .list({
+      maxRecords: 1000,
+    })
+    .then((response) => {
+      res.send(response);
+    });
+});
+
 app.get("/coingecko-cosmos-marketcap", cache.serve(30), async (req, res) => {
   const data = [
     "cosmos",
