@@ -76,6 +76,10 @@ npm run start
 
 **200**: Returns a list of Explorers wallets
 
+### GET `/events`
+
+**200**: Returns a list of Events
+
 ### GET `/coingecko-cosmos-marketcap`
 
 **200**: Returns the value of total market cap of Cosmos projects using Coingecko API
