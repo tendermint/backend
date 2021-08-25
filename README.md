@@ -80,6 +80,10 @@ npm run start
 
 **200**: Returns a list of Events
 
+### GET `/cwu`
+
+**200**: Returns a list of CwU
+
 ### GET `/coingecko-cosmos-marketcap`
 
 **200**: Returns the value of total market cap of Cosmos projects using Coingecko API
