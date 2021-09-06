@@ -229,6 +229,20 @@ app.get("/cwu", async (req, res) => {
     });
 });
 
+app.get("/workshops", async (req, res) => {
+  const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY })
+    .base("appyPXo0kRzyqRPJk")
+    .table("workshops");
+
+  airtable
+    .list({
+      maxRecords: 1000,
+    })
+    .then((response) => {
+      res.send(response);
+    });
+});
+
 app.get("/coingecko-cosmos-marketcap", cache.serve(30), async (req, res) => {
   const data = [
     "cosmos",
