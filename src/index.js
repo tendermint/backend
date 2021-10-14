@@ -4,6 +4,7 @@ const express = require("express"),
   axios = require("axios"),
   fetch = require("node-fetch"),
   Airtable = require("airtable-node"),
+  MailerLite = require('mailerlite-api-v2-node'),
   HTMLParser = require("node-html-parser"),
   _ = require("lodash"),
   cache = require("./cache"),
@@ -17,6 +18,7 @@ const assets = require("../assets.json");
 
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const MESSARI_API_KEY = process.env.MESSARI_API_KEY;
+const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
 
 app.use(bodyParser.json());
 
@@ -60,6 +62,26 @@ app.get("/medium/?", cache.serve(30), function (req, res) {
         .flat(1);
       const sorted = _.orderBy(all, ["timestamp"], ["desc"]);
       res.status(200).send(sorted);
+    });
+});
+
+app.get("/subscriber", cache.serve(30), async (req, res) => {
+  const mailerLite = MailerLite(MAILERLITE_API_KEY);
+  const {userID} = req.body;
+  mailerLite
+    .getSubscriber(userID)
+    .then((response) => {
+      res.send(response);
+    });
+});
+
+app.post("/group-add-subscriber", cache.serve(30), async (req, res) => {
+  const mailerLite = MailerLite(MAILERLITE_API_KEY);
+  const {groupId, userID} = req.body;
+  mailerLite
+    .addSubscriberToGroup(groupId, userID)
+    .then((response) => {
+      res.send(response);
     });
 });
 
