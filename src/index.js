@@ -75,7 +75,7 @@ app.get("/subscriber", cache.serve(30), async (req, res) => {
     });
 });
 
-app.put("/group-add-subscriber", cache.serve(30), async (req, res) => {
+app.post("/group-add-subscriber", cache.serve(30), async (req, res) => {
   const mailerLite = MailerLite(MAILERLITE_API_KEY);
   const {groupId, userID} = req.body;
   mailerLite

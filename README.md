@@ -97,3 +97,15 @@ npm run start
 ### Algolia bump
 
 `node index.js` - update apps and wallets algolia index every hour.
+
+---
+
+### MailerLite
+
+### GET `/subscriber`
+
+**200**: Returns the single subscriber
+
+### POST `/group-add-subscriber`
+
+**200**: Assigns a subscriber to the group with the given name.
