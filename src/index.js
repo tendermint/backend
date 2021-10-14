@@ -67,7 +67,7 @@ app.get("/medium/?", cache.serve(30), function (req, res) {
 
 app.get("/subscriber", cache.serve(30), async (req, res) => {
   const mailerLite = MailerLite(MAILERLITE_API_KEY);
-  const {userID} = req.body;
+  const {userID} = req.params;
   mailerLite
     .getSubscriber(userID)
     .then((response) => {
@@ -77,7 +77,7 @@ app.get("/subscriber", cache.serve(30), async (req, res) => {
 
 app.post("/group-add-subscriber", cache.serve(30), async (req, res) => {
   const mailerLite = MailerLite(MAILERLITE_API_KEY);
-  const {groupId, userID} = req.body;
+  const {groupId, userID} = req.params;
   mailerLite
     .addSubscriberToGroup(groupId, userID)
     .then((response) => {
