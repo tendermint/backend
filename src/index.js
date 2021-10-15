@@ -66,22 +66,53 @@ app.get("/medium/?", cache.serve(30), function (req, res) {
 });
 
 app.get("/subscriber", cache.serve(30), async (req, res) => {
-  const mailerLite = MailerLite(MAILERLITE_API_KEY);
-  const {userID} = req.params;
-  mailerLite
-    .getSubscriber(userID)
-    .then((response) => {
-      res.send(response);
-    });
+  const {userID} = req.query;
+  const options = {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'X-MailerLite-ApiDocs': 'true',
+      'X-MailerLite-ApiKey': MAILERLITE_API_KEY
+    }
+  };
+  
+  axios
+    .get(
+      `https://api.mailerlite.com/api/v2/subscribers/${userID}`,
+      options
+    )
+    .then((responses) => {
+      res.status(200).send(responses.data);
+    })
+    .catch(err => res.status(404).send(err));
 });
 
 app.post("/group-add-subscriber", cache.serve(30), async (req, res) => {
-  const mailerLite = MailerLite(MAILERLITE_API_KEY);
-  const {groupId, userID} = req.params;
-  mailerLite
-    .addSubscriberToGroup(groupId, userID)
-    .then((response) => {
-      res.send(response);
+  const options = {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'X-MailerLite-ApiDocs': 'true',
+      'X-MailerLite-ApiKey': MAILERLITE_API_KEY
+    },
+    body: JSON.stringify({
+      resubscribe: true,
+      autoresponders: true,
+      type: null,
+      ...req.body
+    })
+  };
+
+  axios
+    .post(
+      `https://api.mailerlite.com/api/v2/groups/group_name/subscribers`,
+      options
+    )
+    .then((responses) => {
+      res.status(200).send(responses.data);
+    })
+    .catch(err => {
+      res.status(404).send(err)
     });
 });
 
