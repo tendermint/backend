@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Setup gcloud cli
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@main
         with:
           service_account_key: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_B64 }}
           project_id: tendermint
